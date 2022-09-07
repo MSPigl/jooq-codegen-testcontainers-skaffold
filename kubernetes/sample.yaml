@@ -1,0 +1,38 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: sample
+spec:
+  serviceName: sample-service
+  selector:
+    matchLabels:
+      app: sample
+  template:
+    metadata:
+      labels:
+        app: sample
+    spec:
+      initContainers:
+        - name: init-sample-database
+          image: busybox
+          command: [
+            'sh',
+            '-c',
+            "until nslookup sample-database-service.default.svc.cluster.local; do echo waiting for database; sleep 2; done"
+          ]
+      containers:
+        - name: sample
+          image: mspigl/jooq-codegen-testcontainers-skaffold
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: sample-service
+spec:
+  selector:
+    app: sample
+  ports:
+    - port: 8080

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sample-database
+spec:
+  serviceName: sample-database-service
+  selector:
+    matchLabels:
+      app: sample-database
+  template:
+    metadata:
+      labels:
+        app: sample-database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:14
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "sample_database"
+            - name: POSTGRES_PASSWORD
+              value: "testonly"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-database-service
+spec:
+  selector:
+    app: sample-database
+  ports:
+    - port: 5432

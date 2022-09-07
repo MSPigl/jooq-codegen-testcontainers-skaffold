@@ -1,0 +1,32 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: jooq-codegen-testcontainers-skaffold
+build:
+  local:
+    push: false
+  artifacts:
+  - image: mspigl/jooq-codegen-testcontainers-skaffold
+    jib: {}
+    hooks:
+      before:
+        - command: [ "sh", "-c", "./gradlew classes" ]
+          os: [ darwin, linux ]
+deploy:
+  kubectl:
+    manifests:
+    - kubernetes/sample.yaml
+    - kubernetes/sample-database.yaml
+portForward:
+  - resourceType: statefulset
+    resourceName: sample
+    # kubernetes port
+    port: 8080
+    # localhost port
+    localPort: 8080
+  - resourceType: statefulset
+    resourceName: sample-database
+    # kubernetes port
+    port: 5432
+    # localhost port
+    localPort: 5432
